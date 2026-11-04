@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Member Hub – GameShelf{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4">
+    <!-- Sidebar Navigation -->
+    <div class="col-lg-3">
+      <div class="dashboard-sidebar-container">
+        <!-- User Identity Block -->
+        <div class="d-flex align-items-center gap-3 pb-3 mb-3 border-bottom border-subtle">
+          <img src="{{ url_for('static', filename='uploads/avatars/' + current_user.avatar) if current_user.avatar != 'default_avatar.png' else url_for('static', filename='uploads/avatars/default_avatar.png') }}"
+               class="avatar-md" alt="{{ current_user.username }}" onerror="this.src='/static/uploads/avatars/default_avatar.png'">
+          <div class="overflow-hidden">
+            <h6 class="fw-bold text-white mb-0 text-truncate">{{ current_user.username }}</h6>
+            <span class="text-secondary small d-block text-truncate">{{ current_user.email }}</span>
+          </div>
+        </div>
+
+        <!-- Sidebar Links -->
+        <nav class="d-flex flex-column gap-1">
+          <a href="{{ url_for('users.my_profile') }}" class="sidebar-link-item {% if request.endpoint == 'users.my_profile' %}active{% endif %}">
+            <i class="bi bi-speedometer2 text-info"></i>
+            <span>Overview</span>
+          </a>
+          <a href="{{ url_for('users.my_reviews') }}" class="sidebar-link-item {% if request.endpoint == 'users.my_reviews' %}active{% endif %}">
+            <i class="bi bi-chat-square-quote text-primary"></i>
+            <span>My Reviews</span>
+          </a>
+          <a href="{{ url_for('users.my_ratings') }}" class="sidebar-link-item {% if request.endpoint == 'users.my_ratings' %}active{% endif %}">
+            <i class="bi bi-star text-warning"></i>
+            <span>My Ratings</span>
+          </a>
+          <a href="{{ url_for('users.my_wishlist') }}" class="sidebar-link-item {% if request.endpoint == 'users.my_wishlist' %}active{% endif %}">
+            <i class="bi bi-bookmark-heart text-danger"></i>
+            <span>My Wishlist</span>
+          </a>
+          <a href="{{ url_for('users.my_activity') }}" class="sidebar-link-item {% if request.endpoint == 'users.my_activity' %}active{% endif %}">
+            <i class="bi bi-clock-history text-secondary"></i>
+            <span>Activity History</span>
+          </a>
+          <a href="{{ url_for('users.notifications') }}" class="sidebar-link-item {% if request.endpoint == 'users.notifications' %}active{% endif %} d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center gap-2">
+              <i class="bi bi-bell text-warning"></i>
+              <span>Notifications</span>
+            </div>
+            {% if unread_notifications_count > 0 %}
+              <span class="badge bg-danger rounded-pill" style="font-size: 0.65rem;">{{ unread_notifications_count }}</span>
+            {% endif %}
+          </a>
+          <a href="{{ url_for('users.settings') }}" class="sidebar-link-item {% if request.endpoint == 'users.settings' %}active{% endif %}">
+            <i class="bi bi-gear text-light"></i>
+            <span>Account Settings</span>
+          </a>
+          <hr class="border-subtle my-2">
+          <a href="{{ url_for('users.public_profile', username=current_user.username) }}" class="sidebar-link-item text-info">
+            <i class="bi bi-box-arrow-up-right"></i>
+            <span>Public Profile</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="col-lg-9">
+      {% block dashboard_content %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}

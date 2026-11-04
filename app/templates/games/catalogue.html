@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}Explore Video Games – GameShelf Catalogue{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-end mb-4 gap-3">
+    <div>
+      <div class="d-inline-flex align-items-center gap-2 px-3 py-1 rounded-pill mb-2 border border-subtle small fw-semibold" style="background-color: var(--bg-panel-subtle); color: var(--accent-fuchsia);">
+        <i class="bi bi-controller"></i> STORE & DISCOVERY
+      </div>
+      <h1 class="h2 fw-bold text-white mb-1">Game Catalogue</h1>
+      <p class="text-secondary small mb-0">Browse official game releases, ratings, genres, and community discussions.</p>
+    </div>
+    
+    <div class="text-secondary small">
+      Showing {{ games|length }} of {{ pagination.total if pagination else games|length }} games
+    </div>
+  </div>
+
+  <!-- Horizontal Filter Toolbar -->
+  <div class="filter-toolbar">
+    <form action="{{ url_for('games.catalogue') }}" method="GET" class="w-100 d-flex flex-wrap align-items-center gap-2 m-0" id="catalogueFilterForm">
+      {% if search_query %}
+        <input type="hidden" name="q" value="{{ search_query }}">
+      {% endif %}
+
+      <!-- Sort Selection -->
+      <div class="d-flex align-items-center gap-2">
+        <label class="text-secondary small mb-0 text-nowrap"><i class="bi bi-sort-down me-1"></i>Sort:</label>
+        <select name="sort" class="form-select-launcher" onchange="document.getElementById('catalogueFilterForm').submit()">
+          <option value="popular" {% if selected_sort == 'popular' %}selected{% endif %}>Most Popular</option>
+          <option value="rating" {% if selected_sort == 'rating' %}selected{% endif %}>Highest Rated</option>
+          <option value="newest" {% if selected_sort == 'newest' %}selected{% endif %}>Newest Releases</option>
+          <option value="az" {% if selected_sort == 'az' %}selected{% endif %}>Title: A &rarr; Z</option>
+          <option value="za" {% if selected_sort == 'za' %}selected{% endif %}>Title: Z &rarr; A</option>
+        </select>
+      </div>
+
+      <!-- Genre Selection -->
+      <div class="d-flex align-items-center gap-2">
+        <label class="text-secondary small mb-0 text-nowrap"><i class="bi bi-tag me-1"></i>Genre:</label>
+        <select name="genre" class="form-select-launcher" onchange="document.getElementById('catalogueFilterForm').submit()">
+          <option value="">All Genres</option>
+          {% for g in all_genres %}
+            <option value="{{ g.slug }}" {% if selected_genre == g.slug %}selected{% endif %}>
+              {{ g.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Platform Selection -->
+      <div class="d-flex align-items-center gap-2">
+        <label class="text-secondary small mb-0 text-nowrap"><i class="bi bi-cpu me-1"></i>Platform:</label>
+        <select name="platform" class="form-select-launcher" onchange="document.getElementById('catalogueFilterForm').submit()">
+          <option value="">All Systems</option>
+          {% for p in all_platforms %}
+            <option value="{{ p.slug }}" {% if selected_platform == p.slug %}selected{% endif %}>
+              {{ p.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Mode Selection -->
+      <div class="d-flex align-items-center gap-2">
+        <label class="text-secondary small mb-0 text-nowrap"><i class="bi bi-people me-1"></i>Mode:</label>
+        <select name="mode" class="form-select-launcher" onchange="document.getElementById('catalogueFilterForm').submit()">
+          <option value="">All Modes</option>
+          <option value="Single-player" {% if selected_mode == 'Single-player' %}selected{% endif %}>Single-player</option>
+          <option value="Multiplayer" {% if selected_mode == 'Multiplayer' %}selected{% endif %}>Multiplayer</option>
+          <option value="Both" {% if selected_mode == 'Both' %}selected{% endif %}>Both</option>
+        </select>
+      </div>
+
+      {% if search_query or selected_genre or selected_platform or selected_mode or selected_sort != 'popular' %}
+        <a href="{{ url_for('games.catalogue') }}" class="btn-secondary-launcher btn-sm ms-auto py-1 px-3">
+          <i class="bi bi-x-circle"></i> Reset
+        </a>
+      {% endif %}
+    </form>
+  </div>
+
+  <!-- Active Filters Pills -->
+  {% if search_query or selected_genre or selected_platform or selected_mode %}
+    <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+      <span class="text-muted small">Active:</span>
+      {% if search_query %}
+        <span class="tag-pill-xs text-white">Search: "{{ search_query }}"</span>
+      {% endif %}
+      {% if selected_genre %}
+        <span class="tag-pill-xs text-fuchsia">Genre: {{ selected_genre }}</span>
+      {% endif %}
+      {% if selected_platform %}
+        <span class="tag-pill-xs text-white">Platform: {{ selected_platform }}</span>
+      {% endif %}
+      {% if selected_mode %}
+        <span class="tag-pill-xs text-white">Mode: {{ selected_mode }}</span>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <!-- Games Grid -->
+  <div class="row g-3">
+    {% for game in games %}
+      <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+        <a href="{{ url_for('games.detail', slug=game.slug) }}" class="launcher-game-card" style="height: 310px;">
+          <img src="{{ url_for('static', filename='uploads/covers/' + game.cover_image) }}" 
+               alt="{{ game.title }}" class="launcher-card-img" loading="lazy"
+               onerror="this.src='/static/uploads/covers/spiderman-cover.jpg'">
+          
+          <div class="launcher-card-overlay"></div>
+
+          <!-- Top Badge: Rating -->
+          <div class="launcher-card-topbadge">
+            <i class="bi bi-star-fill text-warning"></i>
+            <span>{{ game.average_rating }}</span>
+            <span class="text-muted">({{ game.total_ratings }})</span>
+          </div>
+
+          <div class="launcher-card-content">
+            <h3 class="launcher-card-title" title="{{ game.title }}">{{ game.title }}</h3>
+            
+            <div class="launcher-card-tags mb-2">
+              {% for g in game.genres[:2] %}
+                <span class="tag-pill-xs">{{ g.name }}</span>
+              {% endfor %}
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top border-subtle small">
+              <span class="text-muted" style="font-size: 0.75rem;">{{ game.developer or 'Game Studio' }}</span>
+              <span class="btn-like-pill p-1 px-2 border-0" onclick="event.preventDefault();" data-game-id="{{ game.id }}">
+                <i class="bi bi-heart me-1"></i> <span class="like-count">{{ game.likes|length }}</span>
+              </span>
+            </div>
+          </div>
+        </a>
+      </div>
+    {% else %}
+      <div class="col-12 py-5 text-center">
+        <div class="glass-panel p-5 text-center">
+          <i class="bi bi-controller fs-1 text-muted mb-3 d-block"></i>
+          <h4 class="text-white fw-bold mb-2">No matching games found</h4>
+          <p class="text-secondary small mb-4" style="max-width: 460px; margin: 0 auto;">
+            We couldn't find any titles matching your filter selections. Try broadening your keywords or resetting filters.
+          </p>
+          <a href="{{ url_for('games.catalogue') }}" class="btn-secondary-launcher btn-sm">
+            Reset All Filters
+          </a>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  {% if pagination and pagination.pages > 1 %}
+    <nav class="mt-4 d-flex justify-content-center" aria-label="Catalogue pagination">
+      <ul class="pagination pagination-sm gap-1">
+        {% if pagination.has_prev %}
+          <li class="page-item">
+            <a class="page-link border-0 text-white rounded" style="background-color: var(--bg-panel-subtle);" href="{{ url_for('games.catalogue', page=pagination.prev_num, q=search_query, genre=selected_genre, platform=selected_platform, mode=selected_mode, sort=selected_sort) }}">
+              <i class="bi bi-chevron-left"></i>
+            </a>
+          </li>
+        {% endif %}
+
+        {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+          {% if p %}
+            <li class="page-item {% if p == pagination.page %}active{% endif %}">
+              <a class="page-link border-0 text-white rounded {% if p == pagination.page %}fw-bold{% endif %}"
+                 style="background-color: {% if p == pagination.page %}var(--accent-fuchsia){% else %}var(--bg-panel-subtle){% endif %};"
+                 href="{{ url_for('games.catalogue', page=p, q=search_query, genre=selected_genre, platform=selected_platform, mode=selected_mode, sort=selected_sort) }}">
+                {{ p }}
+              </a>
+            </li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link border-0 text-muted" style="background-color: var(--bg-panel-subtle);">…</span></li>
+          {% endif %}
+        {% endfor %}
+
+        {% if pagination.has_next %}
+          <li class="page-item">
+            <a class="page-link border-0 text-white rounded" style="background-color: var(--bg-panel-subtle);" href="{{ url_for('games.catalogue', page=pagination.next_num, q=search_query, genre=selected_genre, platform=selected_platform, mode=selected_mode, sort=selected_sort) }}">
+              <i class="bi bi-chevron-right"></i>
+            </a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% endif %}
+</div>
+{% endblock %}

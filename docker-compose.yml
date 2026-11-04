@@ -1,0 +1,64 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: gameshelf-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gameshelf_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-gameshelf_secure_password_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-gameshelf_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gameshelf_user} -d ${POSTGRES_DB:-gameshelf_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    networks:
+      - gameshelf-network
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gameshelf-web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_APP=run.py
+      - FLASK_ENV=${FLASK_ENV:-production}
+      - FLASK_DEBUG=${FLASK_DEBUG:-0}
+      - SECRET_KEY=${SECRET_KEY:-gameshelf-ultra-secret-dev-key-778899aabbcc}
+      - POSTGRES_USER=${POSTGRES_USER:-gameshelf_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-gameshelf_secure_password_2026}
+      - POSTGRES_DB=${POSTGRES_DB:-gameshelf_db}
+      - POSTGRES_HOST=db
+      - POSTGRES_PORT=5432
+      - DATABASE_URL=postgresql+psycopg2://${POSTGRES_USER:-gameshelf_user}:${POSTGRES_PASSWORD:-gameshelf_secure_password_2026}@db:5432/${POSTGRES_DB:-gameshelf_db}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-admin@gameshelf.com}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-Admin123!}
+    volumes:
+      - ./app:/app/app
+      - ./cli.py:/app/cli.py
+      - ./test_app.py:/app/test_app.py
+      - uploads_data:/app/app/static/uploads
+    networks:
+      - gameshelf-network
+
+volumes:
+  postgres_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+networks:
+  gameshelf-network:
+    driver: bridge

@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="{{ csrf_token() }}">
+  <title>{% block title %}GameShelf – Gaming Platform & Community{% endblock %}</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+  <!-- Bootstrap 5 CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Custom GameShelf Theme CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Launcher Main Shell -->
+  <div class="launcher-shell">
+    
+    <!-- LEFT SIDEBAR -->
+    <aside class="launcher-sidebar" id="launcherSidebar">
+      <!-- Brand Logo -->
+      <a class="sidebar-brand" href="{{ url_for('games.index') }}">
+        <div class="sidebar-brand-icon">
+          <i class="bi bi-controller text-white fs-5"></i>
+        </div>
+        <div class="sidebar-brand-text">Game<span>Shelf</span></div>
+      </a>
+
+      <!-- Main Navigation Menu -->
+      <ul class="sidebar-nav-list">
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link {% if request.endpoint == 'games.index' %}active{% endif %}" href="{{ url_for('games.index') }}">
+            <i class="bi bi-grid-fill"></i>
+            <span>My Dashboard</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link {% if request.endpoint == 'games.catalogue' and not request.args.get('sort') == 'popular' %}active{% endif %}" href="{{ url_for('games.catalogue') }}">
+            <i class="bi bi-controller"></i>
+            <span>Game's List</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link {% if request.args.get('sort') == 'popular' %}active{% endif %}" href="{{ url_for('games.catalogue', sort='popular') }}">
+            <i class="bi bi-compass"></i>
+            <span>Explore Store</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link {% if request.endpoint == 'users.my_wishlist' %}active{% endif %}" href="{{ url_for('users.my_wishlist') if current_user else url_for('auth.login') }}">
+            <i class="bi bi-bookmark-heart"></i>
+            <span>Purchased</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link" href="{{ url_for('games.index') }}#community-section">
+            <i class="bi bi-people"></i>
+            <span>Friends</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link {% if request.endpoint == 'users.my_ratings' %}active{% endif %}" href="{{ url_for('users.my_ratings') if current_user else url_for('auth.login') }}">
+            <i class="bi bi-star"></i>
+            <span>Payments / Ratings</span>
+          </a>
+        </li>
+        <li class="sidebar-nav-item">
+          <a class="sidebar-nav-link {% if request.endpoint == 'users.notifications' %}active{% endif %}" href="{{ url_for('users.notifications') if current_user else url_for('auth.login') }}">
+            <i class="bi bi-bell"></i>
+            <span>Notification</span>
+            {% if unread_notifications_count > 0 %}
+              <span class="badge bg-danger rounded-pill ms-auto" style="font-size: 0.65rem;">{{ unread_notifications_count }}</span>
+            {% endif %}
+          </a>
+        </li>
+      </ul>
+
+      <!-- ONLINE PLAYERS SECTION -->
+      <div class="sidebar-section-divider">
+        <span class="sidebar-section-title">ONLINE PLAYERS</span>
+        <button class="sidebar-section-btn" title="Add Friend"><i class="bi bi-plus-lg"></i></button>
+      </div>
+
+      <ul class="sidebar-players-list">
+        {% if online_users %}
+          {% for player in online_users %}
+            <li class="sidebar-player-item">
+              <div class="sidebar-player-avatar-wrapper">
+                <img src="{{ url_for('static', filename='uploads/avatars/' + player.avatar) if player.avatar != 'default_avatar.png' else url_for('static', filename='uploads/avatars/default_avatar.png') }}"
+                     alt="{{ player.username }}" class="sidebar-player-avatar" onerror="this.src='/static/uploads/avatars/default_avatar.png'">
+                <span class="sidebar-player-dot"></span>
+              </div>
+              <span class="sidebar-player-name">{{ player.username }}</span>
+            </li>
+          {% endfor %}
+        {% else %}
+          <li class="sidebar-player-item">
+            <div class="sidebar-player-avatar-wrapper">
+              <img src="{{ url_for('static', filename='uploads/avatars/esther.jpg') }}" alt="Esther Howard" class="sidebar-player-avatar" onerror="this.src='/static/uploads/avatars/default_avatar.png'">
+              <span class="sidebar-player-dot"></span>
+            </div>
+            <span class="sidebar-player-name">Esther Howard</span>
+          </li>
+          <li class="sidebar-player-item">
+            <div class="sidebar-player-avatar-wrapper">
+              <img src="{{ url_for('static', filename='uploads/avatars/jacob.jpg') }}" alt="Jacob Jones" class="sidebar-player-avatar" onerror="this.src='/static/uploads/avatars/default_avatar.png'">
+              <span class="sidebar-player-dot"></span>
+            </div>
+            <span class="sidebar-player-name">Jacob Jones</span>
+          </li>
+          <li class="sidebar-player-item">
+            <div class="sidebar-player-avatar-wrapper">
+              <img src="{{ url_for('static', filename='uploads/avatars/cody.jpg') }}" alt="Cody Fisher" class="sidebar-player-avatar" onerror="this.src='/static/uploads/avatars/default_avatar.png'">
+              <span class="sidebar-player-dot"></span>
+            </div>
+            <span class="sidebar-player-name">Cody Fisher</span>
+          </li>
+          <li class="sidebar-player-item">
+            <div class="sidebar-player-avatar-wrapper">
+              <img src="{{ url_for('static', filename='uploads/avatars/alex.jpg') }}" alt="Alex Rayhan" class="sidebar-player-avatar" onerror="this.src='/static/uploads/avatars/default_avatar.png'">
+              <span class="sidebar-player-dot"></span>
+            </div>
+            <span class="sidebar-player-name">Alex Rayhan</span>
+          </li>
+        {% endif %}
+      </ul>
+
+      <!-- SIDEBAR FOOTER (LOG OUT / SIGN IN) -->
+      <div class="sidebar-footer">
+        {% if current_user %}
+          <form action="{{ url_for('auth.logout') }}" method="POST" class="m-0">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit" class="btn-sidebar-logout">
+              <i class="bi bi-box-arrow-right"></i>
+              <span>Log Out</span>
+            </button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('auth.login') }}" class="btn-sidebar-logout">
+            <i class="bi bi-box-arrow-in-right"></i>
+            <span>Log In</span>
+          </a>
+        {% endif %}
+      </div>
+    </aside>
+
+    <!-- MAIN VIEWPORT (TOP BAR + CONTENT) -->
+    <div class="launcher-main">
+      
+      <!-- TOP NAVIGATION BAR -->
+      <header class="launcher-topbar">
+        <!-- Mobile Toggle Button -->
+        <button class="launcher-mobile-toggle" id="mobileSidebarToggle" aria-label="Toggle Sidebar">
+          <i class="bi bi-list"></i>
+        </button>
+
+        <!-- Search Bar (Capsule Pill) -->
+        <form class="launcher-search-form" action="{{ url_for('games.catalogue') }}" method="GET">
+          <i class="bi bi-search launcher-search-icon"></i>
+          <input class="launcher-search-input" type="search" name="q" placeholder="Search for games..." value="{{ request.args.get('q', '') }}" autocomplete="off">
+        </form>
+
+        <!-- Topbar Actions -->
+        <div class="launcher-topbar-actions">
+          <!-- Notification Bell -->
+          <a href="{{ url_for('users.notifications') if current_user else url_for('auth.login') }}" class="btn-topbar-bell" title="Notifications">
+            <i class="bi bi-bell"></i>
+            {% if unread_notifications_count > 0 %}
+              <span class="bell-badge"></span>
+            {% endif %}
+          </a>
+
+          <!-- User Capsule Pill -->
+          {% if current_user %}
+            <div class="dropdown">
+              <div class="user-capsule-btn" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="{{ url_for('static', filename='uploads/avatars/' + current_user.avatar) if current_user.avatar != 'default_avatar.png' else url_for('static', filename='uploads/avatars/default_avatar.png') }}"
+                     alt="{{ current_user.username }}" class="user-capsule-avatar" onerror="this.src='/static/uploads/avatars/default_avatar.png'">
+                <div class="user-capsule-info d-none d-sm-flex">
+                  <span class="user-capsule-name">{{ current_user.username }}</span>
+                  <span class="user-capsule-tag">@{{ current_user.username.lower() }}.gg</span>
+                </div>
+                <i class="bi bi-chevron-down text-muted small ms-1"></i>
+              </div>
+
+              <ul class="dropdown-menu dropdown-menu-end dropdown-menu-launcher">
+                <li class="px-3 py-2 border-bottom border-subtle">
+                  <div class="text-white fw-bold small">{{ current_user.username }}</div>
+                  <div class="text-muted" style="font-size: 0.75rem;">{{ current_user.email }}</div>
+                  {% if current_user.is_admin %}
+                    <span class="badge bg-danger mt-1" style="font-size: 0.65rem;">ADMINISTRATOR</span>
+                  {% endif %}
+                </li>
+                <li><a class="dropdown-item-launcher" href="{{ url_for('users.my_profile') }}"><i class="bi bi-person"></i> My Profile</a></li>
+                <li><a class="dropdown-item-launcher" href="{{ url_for('users.my_reviews') }}"><i class="bi bi-chat-left-quote"></i> My Reviews</a></li>
+                <li><a class="dropdown-item-launcher" href="{{ url_for('users.my_ratings') }}"><i class="bi bi-star"></i> My Ratings</a></li>
+                <li><a class="dropdown-item-launcher" href="{{ url_for('users.my_wishlist') }}"><i class="bi bi-bookmark-heart"></i> My Wishlist</a></li>
+                <li><a class="dropdown-item-launcher" href="{{ url_for('users.settings') }}"><i class="bi bi-gear"></i> Settings</a></li>
+                {% if current_user.is_admin %}
+                  <li><hr class="dropdown-divider border-subtle my-1"></li>
+                  <li><a class="dropdown-item-launcher text-warning" href="{{ url_for('admin.overview') }}"><i class="bi bi-shield-shaded"></i> Admin Portal</a></li>
+                {% endif %}
+                <li><hr class="dropdown-divider border-subtle my-1"></li>
+                <li>
+                  <form action="{{ url_for('auth.logout') }}" method="POST" class="m-0">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="dropdown-item-launcher text-danger border-0 bg-transparent w-100 text-start">
+                      <i class="bi bi-box-arrow-right"></i> Log Out
+                    </button>
+                  </form>
+                </li>
+              </ul>
+            </div>
+          {% else %}
+            <a href="{{ url_for('auth.login') }}" class="btn-secondary-launcher btn-sm">Sign In</a>
+            <a href="{{ url_for('auth.register') }}" class="btn-primary-launcher btn-sm">Join</a>
+          {% endif %}
+        </div>
+      </header>
+
+      <!-- Flashed Messages -->
+      <div class="px-4 pt-3">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-launcher alert-dismissible fade show" role="alert">
+                <i class="bi bi-info-circle-fill me-2 text-warning"></i>
+                <span>{{ message }}</span>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+              </div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+      </div>
+
+      <!-- PAGE CONTENT AREA -->
+      <main class="launcher-content">
+        {% block content %}{% endblock %}
+      </main>
+
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container-custom"></div>
+
+  <!-- Bootstrap 5 Bundle JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Interactive Script -->
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+  <script>
+    // Mobile sidebar toggle
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggle = document.getElementById('mobileSidebarToggle');
+      const sidebar = document.getElementById('launcherSidebar');
+      if (toggle && sidebar) {
+        toggle.addEventListener('click', () => {
+          sidebar.classList.toggle('open');
+        });
+      }
+    });
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

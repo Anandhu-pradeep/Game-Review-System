@@ -1,0 +1,65 @@
+{% extends "users/dashboard_layout.html" %}
+
+{% block title %}Notifications – Member Hub – GameShelf{% endblock %}
+
+{% block dashboard_content %}
+<div class="p-4 rounded-4 border border-subtle" style="background-color: var(--bg-card);">
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-subtle">
+    <div>
+      <h3 class="fw-bold text-white mb-1"><i class="bi bi-bell text-warning me-2"></i> Notifications</h3>
+      <p class="text-secondary small mb-0">Stay notified when other gamers reply or react to your reviews.</p>
+    </div>
+    {% if unread_notifications_count > 0 %}
+      <form action="{{ url_for('users.mark_all_read') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="btn btn-secondary-gaming btn-sm">
+          <i class="bi bi-check2-all me-1"></i> Mark All Read
+        </button>
+      </form>
+    {% endif %}
+  </div>
+
+  {% if notifications %}
+    <div class="d-flex flex-column gap-3">
+      {% for notif in notifications %}
+        <div class="p-3 rounded-3 border d-flex justify-content-between align-items-center"
+             style="background-color: {% if not notif.is_read %}var(--bg-surface){% else %}var(--bg-card){% endif %}; border-color: {% if not notif.is_read %}var(--accent-primary){% else %}var(--border-subtle){% endif %} !important;">
+          <div class="d-flex align-items-center gap-3">
+            <div class="metric-icon-box" style="background-color: {% if not notif.is_read %}var(--accent-primary-subtle){% else %}rgba(255,255,255,0.04){% endif %}; color: {% if not notif.is_read %}var(--accent-primary){% else %}var(--text-muted){% endif %}; width: 38px; height: 38px;">
+              <i class="bi {% if notif.type == 'comment' %}bi-chat-dots-fill{% elif notif.type == 'like' %}bi-heart-fill{% else %}bi-info-circle-fill{% endif %}"></i>
+            </div>
+            <div>
+              <div class="text-white small fw-medium">{{ notif.message }}</div>
+              <div class="text-muted small" style="font-size: 0.72rem;">{{ notif.created_at|time_ago }}</div>
+            </div>
+          </div>
+
+          <div class="d-flex align-items-center gap-2">
+            {% if notif.link %}
+              <form action="{{ url_for('users.mark_read', notif_id=notif.id) }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-secondary-gaming btn-sm">
+                  View &rarr;
+                </button>
+              </form>
+            {% elif not notif.is_read %}
+              <form action="{{ url_for('users.mark_read', notif_id=notif.id) }}" method="POST">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit" class="btn btn-sm btn-outline-secondary">
+                  Mark Read
+                </button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-5 text-secondary">
+      <i class="bi bi-bell-slash fs-1 mb-3 d-block text-muted"></i>
+      <h5 class="text-white">No notifications at this time.</h5>
+      <p class="small">When members interact with your reviews or ratings, alerts will appear here.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

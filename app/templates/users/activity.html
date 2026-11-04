@@ -1,0 +1,58 @@
+{% extends "users/dashboard_layout.html" %}
+
+{% block title %}Activity Stream – Member Hub – GameShelf{% endblock %}
+
+{% block dashboard_content %}
+<div class="p-4 rounded-4 border border-subtle" style="background-color: var(--bg-card);">
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-subtle">
+    <div>
+      <h3 class="fw-bold text-white mb-1"><i class="bi bi-clock-history text-secondary me-2"></i> Activity Timeline</h3>
+      <p class="text-secondary small mb-0">A complete log of your ratings, reviews, likes, and comments.</p>
+    </div>
+    <span class="badge px-3 py-2 border border-subtle" style="background-color: var(--bg-surface);">{{ activities|length }} Events</span>
+  </div>
+
+  {% if activities %}
+    <div class="position-relative ps-4 border-start border-subtle ms-3 d-flex flex-column gap-4">
+      {% for act in activities %}
+        <div class="position-relative">
+          <span class="position-absolute top-0 start-0 translate-middle p-2 rounded-circle border border-dark
+            {% if act.activity_type == 'rated' %}bg-warning
+            {% elif act.activity_type == 'reviewed' %}bg-info
+            {% elif act.activity_type == 'liked' %}bg-danger
+            {% elif act.activity_type == 'wishlisted' %}bg-primary
+            {% else %}bg-secondary{% endif %}" style="left: -17px !important;">
+          </span>
+
+          <div class="p-3 rounded-3 border border-subtle" style="background-color: var(--bg-surface);">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+              <span class="text-white fw-medium small">
+                {% if act.activity_type == 'rated' %}<i class="bi bi-star-fill text-warning me-1"></i>
+                {% elif act.activity_type == 'reviewed' %}<i class="bi bi-chat-quote-fill text-info me-1"></i>
+                {% elif act.activity_type == 'liked' %}<i class="bi bi-heart-fill text-danger me-1"></i>
+                {% elif act.activity_type == 'wishlisted' %}<i class="bi bi-bookmark-fill text-primary me-1"></i>
+                {% endif %}
+                You {{ act.description }}
+              </span>
+              <span class="text-muted small" style="font-size: 0.72rem;">{{ act.created_at|time_ago }}</span>
+            </div>
+            {% if act.game %}
+              <div class="mt-2">
+                <a href="{{ url_for('games.detail', slug=act.game.slug) }}" class="small text-info fw-semibold">
+                  Open Game Page: {{ act.game.title }} &rarr;
+                </a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-5 text-secondary">
+      <i class="bi bi-activity fs-1 mb-3 d-block text-muted"></i>
+      <h5 class="text-white">No activities recorded yet.</h5>
+      <p class="small">Interact with games by rating or writing reviews to build your gaming history!</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

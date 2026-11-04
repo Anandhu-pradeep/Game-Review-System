@@ -1,0 +1,62 @@
+{% extends "users/dashboard_layout.html" %}
+
+{% block title %}My Wishlist – Member Hub – GameShelf{% endblock %}
+
+{% block dashboard_content %}
+<div class="p-4 rounded-4 border border-subtle" style="background-color: var(--bg-card);">
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-subtle">
+    <div>
+      <h3 class="fw-bold text-white mb-1"><i class="bi bi-bookmark-heart text-danger me-2"></i> My Wishlist</h3>
+      <p class="text-secondary small mb-0">Games you're planning to play, purchase, or track.</p>
+    </div>
+    <span class="badge px-3 py-2 border border-subtle" style="background-color: var(--bg-surface);">{{ wishlist_items|length }} Saved</span>
+  </div>
+
+  {% if wishlist_items %}
+    <div class="row g-4">
+      {% for item in wishlist_items %}
+        <div class="col-xl-3 col-lg-4 col-md-6 col-sm-6">
+          <div class="game-card-premium">
+            <div class="game-card-media">
+              <img src="{{ url_for('static', filename='uploads/covers/' + item.game.cover_image) }}" alt="{{ item.game.title }}" class="game-card-img">
+              <div class="game-card-overlay-badges">
+                <span class="rating-badge">
+                  <i class="bi bi-star-fill text-warning"></i> {{ item.game.average_rating }}
+                </span>
+              </div>
+            </div>
+
+            <div class="game-card-content">
+              <h4 class="game-card-heading" title="{{ item.game.title }}">
+                <a href="{{ url_for('games.detail', slug=item.game.slug) }}" class="text-white">{{ item.game.title }}</a>
+              </h4>
+              <div class="game-card-dev">{{ item.game.developer or 'Game Studio' }}</div>
+
+              <div class="mt-auto">
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top border-subtle">
+                  <form action="{{ url_for('games.toggle_wishlist', game_id=item.game.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-sm btn-outline-danger p-1 px-2" title="Remove from Wishlist">
+                      <i class="bi bi-trash me-1"></i> Remove
+                    </button>
+                  </form>
+                  <a href="{{ url_for('games.detail', slug=item.game.slug) }}" class="btn btn-secondary-gaming btn-sm">
+                    View
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-5 text-secondary">
+      <i class="bi bi-bookmark-dash fs-1 mb-3 d-block text-muted"></i>
+      <h5 class="text-white">Your wishlist is currently empty.</h5>
+      <p class="small">Click "Add to Wishlist" on any game to bookmark it for later!</p>
+      <a href="{{ url_for('games.catalogue') }}" class="btn btn-primary-gaming btn-sm mt-2">Browse Catalogue</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

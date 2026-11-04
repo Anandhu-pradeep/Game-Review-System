@@ -1,0 +1,119 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}Manage Genres – Admin Console – GameShelf{% endblock %}
+
+{% block admin_content %}
+<div class="p-4 rounded-4 border border-subtle" style="background-color: var(--bg-card);">
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-subtle">
+    <div>
+      <h3 class="fw-bold text-white mb-1"><i class="bi bi-tags text-warning me-2"></i> Manage Genres</h3>
+      <p class="text-secondary small mb-0">Create and curate genre categories for catalogue discovery.</p>
+    </div>
+    <button class="btn btn-primary-gaming btn-sm" data-bs-toggle="modal" data-bs-target="#addGenreModal">
+      <i class="bi bi-plus-lg me-1"></i> Add Genre
+    </button>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-dark-custom align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Slug</th>
+          <th>Description</th>
+          <th>Games Linked</th>
+          <th class="text-end">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for g in genres %}
+          <tr>
+            <td class="fw-bold text-white">{{ g.name }}</td>
+            <td><code class="text-info">{{ g.slug }}</code></td>
+            <td class="text-secondary small">{{ g.description or 'No description provided' }}</td>
+            <td>
+              <span class="badge border border-subtle" style="background-color: var(--bg-surface);">{{ g.games|length }} titles</span>
+            </td>
+            <td class="text-end">
+              <div class="d-inline-flex gap-2">
+                <button class="btn-icon-subtle text-info" data-bs-toggle="modal" data-bs-target="#editGenreModal{{ g.id }}" title="Edit Genre">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <form action="{{ url_for('admin.manage_genres') }}" method="POST" class="d-inline">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="genre_id" value="{{ g.id }}">
+                  <button type="submit" class="btn-icon-subtle text-danger" title="Delete Genre" data-confirm="Delete genre '{{ g.name }}'?">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Edit Genre Modal -->
+          <div class="modal fade" id="editGenreModal{{ g.id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content modal-content-custom">
+                <div class="modal-header modal-header-custom">
+                  <h5 class="modal-title fw-bold text-white">Edit Genre: {{ g.name }}</h5>
+                  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="{{ url_for('admin.manage_genres') }}" method="POST">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                  <input type="hidden" name="action" value="edit">
+                  <input type="hidden" name="genre_id" value="{{ g.id }}">
+                  <div class="modal-body p-4">
+                    <div class="mb-3">
+                      <label class="form-label text-secondary small fw-bold text-uppercase">Genre Name</label>
+                      <input type="text" name="name" class="form-control form-control-gaming" value="{{ g.name }}" required>
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label text-secondary small fw-bold text-uppercase">Description</label>
+                      <textarea name="description" class="form-control form-control-gaming" rows="3">{{ g.description or '' }}</textarea>
+                    </div>
+                  </div>
+                  <div class="modal-footer modal-footer-custom">
+                    <button type="button" class="btn btn-secondary-gaming btn-sm" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary-gaming btn-sm">Update Genre</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add Genre Modal -->
+<div class="modal fade" id="addGenreModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content modal-content-custom">
+      <div class="modal-header modal-header-custom">
+        <h5 class="modal-title fw-bold text-white">Add New Genre</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <form action="{{ url_for('admin.manage_genres') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="add">
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label text-secondary small fw-bold text-uppercase">Genre Name</label>
+            <input type="text" name="name" class="form-control form-control-gaming" placeholder="e.g. Rogue-lite" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-secondary small fw-bold text-uppercase">Description</label>
+            <textarea name="description" class="form-control form-control-gaming" rows="3" placeholder="Description of this gameplay category..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer modal-footer-custom">
+          <button type="button" class="btn btn-secondary-gaming btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary-gaming btn-sm">Create Genre</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

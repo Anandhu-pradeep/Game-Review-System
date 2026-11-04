@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}GameShelf – Gaming Platform & Community{% endblock %}
+
+{% block content %}
+<!-- ==========================================================================
+     TOP DASHBOARD GRID: FEATURED HERO (LEFT) + IN LIBRARY (RIGHT)
+     ========================================================================== -->
+<div class="dashboard-top-grid">
+
+  <!-- LEFT: CINEMATIC FEATURED HERO CARD (Spider-Man / Curated Carousel) -->
+  <div class="featured-hero-card" id="featuredHeroCard">
+    {% set hero_item = featured_game %}
+    <img src="{{ url_for('static', filename='uploads/banners/' + hero_item.banner_image) if hero_item and hero_item.banner_image else url_for('static', filename='uploads/banners/spiderman-banner.jpg') }}"
+         alt="{{ hero_item.title if hero_item else 'Featured Game' }}" 
+         class="featured-hero-bg" id="heroBgImg"
+         onerror="this.src='/static/uploads/banners/spiderman-banner.jpg'">
+    
+    <div class="featured-hero-overlay"></div>
+
+    <div class="featured-hero-content">
+      <div class="featured-badge-popular">
+        <i class="bi bi-stars"></i> Popular
+      </div>
+
+      <h1 class="featured-hero-title" id="heroTitle">
+        {{ hero_item.title if hero_item else "Marvel's Spider-Man Remastered" }}
+      </h1>
+
+      <p class="featured-hero-desc" id="heroDesc">
+        {{ hero_item.description if hero_item else "Worlds collide in an original action-packed story. Play as Peter Parker battling iconic Marvel villains in Marvel's New York. Web-swing through vibrant neighborhoods and defeat criminals with epic takedowns." }}
+      </p>
+
+      <div>
+        <a href="{{ url_for('games.detail', slug=hero_item.slug) if hero_item else '#' }}" class="btn-hero-cta" id="heroCtaBtn">
+          Book Now
+        </a>
+      </div>
+    </div>
+
+    <!-- Carousel Controls & Indicator at Bottom of Card -->
+    <div class="featured-hero-footer">
+      <div class="hero-carousel-controls">
+        <button type="button" class="hero-carousel-btn" id="heroPrevBtn" aria-label="Previous Slide">
+          <i class="bi bi-chevron-left"></i>
+        </button>
+        <button type="button" class="hero-carousel-btn" id="heroNextBtn" aria-label="Next Slide">
+          <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+
+      <div class="hero-carousel-indicator">
+        <span id="heroCurrentSlide">1</span>/<span id="heroTotalSlides">{{ carousel_games|length if carousel_games else 5 }}</span>
+        <i class="bi bi-circle-half text-fuchsia ms-1"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: IN LIBRARY PANEL -->
+  <div class="in-library-card">
+    <div class="in-library-header">
+      <h3 class="in-library-title">In Library</h3>
+      <a href="{{ url_for('users.my_wishlist') if current_user else url_for('games.catalogue') }}" class="tag-pill-xs text-decoration-none">
+        View All
+      </a>
+    </div>
+
+    <div class="in-library-list">
+      {% if in_library_games %}
+        {% for game in in_library_games[:4] %}
+          <a href="{{ url_for('games.detail', slug=game.slug) }}" class="in-library-item">
+            <div class="in-library-left">
+              <img src="{{ url_for('static', filename='uploads/covers/' + game.cover_image) }}" 
+                   alt="{{ game.title }}" class="in-library-thumb"
+                   onerror="this.src='/static/uploads/covers/spiderman-cover.jpg'">
+              <div class="in-library-info">
+                <span class="in-library-name" title="{{ game.title }}">{{ game.title }}</span>
+                <div class="in-library-tags">
+                  {% for g in game.genres[:2] %}
+                    <span class="tag-pill-xs">{{ g.name }}</span>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+            <div class="in-library-action" title="Play / View Game">
+              <i class="bi bi-arrow-down-short fs-5"></i>
+            </div>
+          </a>
+        {% endfor %}
+      {% else %}
+        <!-- Fallback library display if no games loaded -->
+        <div class="in-library-item">
+          <div class="in-library-left">
+            <img src="{{ url_for('static', filename='uploads/covers/spiderman-cover.jpg') }}" alt="Game" class="in-library-thumb">
+            <div class="in-library-info">
+              <span class="in-library-name">Clash of Clan Emulator</span>
+              <div class="in-library-tags">
+                <span class="tag-pill-xs">Strategy</span>
+                <span class="tag-pill-xs">Battle Royale</span>
+              </div>
+            </div>
+          </div>
+          <div class="in-library-action"><i class="bi bi-arrow-down-short fs-5"></i></div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ==========================================================================
+     MIDDLE SECTION: "YOU MIGHT ALSO LIKE" (4 CARDS)
+     ========================================================================== -->
+<div class="mt-4 mb-5">
+  <div class="section-header-launcher">
+    <h2 class="section-title-launcher">You Might Also Like</h2>
+    <div class="section-controls-launcher">
+      <button class="section-arrow-btn" id="recomPrevBtn" aria-label="Previous"><i class="bi bi-chevron-left"></i></button>
+      <button class="section-arrow-btn" id="recomNextBtn" aria-label="Next"><i class="bi bi-chevron-right"></i></button>
+    </div>
+  </div>
+
+  <div class="launcher-cards-grid" id="recomCardsGrid">
+    {% for game in you_might_like[:4] %}
+      <a href="{{ url_for('games.detail', slug=game.slug) }}" class="launcher-game-card">
+        <img src="{{ url_for('static', filename='uploads/covers/' + game.cover_image) }}" 
+             alt="{{ game.title }}" class="launcher-card-img" loading="lazy"
+             onerror="this.src='/static/uploads/covers/spiderman-cover.jpg'">
+        
+        <div class="launcher-card-overlay"></div>
+
+        <!-- Top Right Badge: 2.5k Players or Rating -->
+        <div class="launcher-card-topbadge">
+          <i class="bi bi-people-fill text-fuchsia"></i>
+          <span>2.5k Players</span>
+        </div>
+
+        <div class="launcher-card-content">
+          <h3 class="launcher-card-title" title="{{ game.title }}">{{ game.title }}</h3>
+          <div class="launcher-card-tags">
+            {% for g in game.genres[:2] %}
+              <span class="tag-pill-xs">{{ g.name }}</span>
+            {% endfor %}
+            <span class="tag-pill-xs"><i class="bi bi-star-fill text-warning me-1"></i>{{ game.average_rating }}</span>
+          </div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+
+<!-- ==========================================================================
+     COMMUNITY REVIEWS SECTION
+     ========================================================================== -->
+<div class="mt-5 mb-5" id="community-section">
+  <div class="section-header-launcher">
+    <div>
+      <h2 class="section-title-launcher">Community Reviews</h2>
+      <p class="text-secondary small mb-0">Player thoughts, critiques, and recommendations.</p>
+    </div>
+    <a href="{{ url_for('games.catalogue') }}" class="tag-pill-xs text-decoration-none">
+      Explore All Games
+    </a>
+  </div>
+
+  <div class="row g-3">
+    {% for review in community_reviews %}
+      <div class="col-lg-4 col-md-6">
+        <div class="review-card-launcher h-100 d-flex flex-direction-column">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex align-items-center gap-2">
+              <img src="{{ url_for('static', filename='uploads/avatars/' + review.user.avatar) if review.user.avatar != 'default_avatar.png' else url_for('static', filename='uploads/avatars/default_avatar.png') }}"
+                   alt="{{ review.user.username }}" class="sidebar-player-avatar" style="width: 32px; height: 32px;"
+                   onerror="this.src='/static/uploads/avatars/default_avatar.png'">
+              <div>
+                <div class="fw-semibold text-white small">{{ review.user.username }}</div>
+                <div class="text-muted" style="font-size: 0.72rem;">{{ review.created_at|time_ago }}</div>
+              </div>
+            </div>
+            <div class="text-warning small">
+              {% for i in range(review.rating_score or 5) %}<i class="bi bi-star-fill"></i>{% endfor %}
+            </div>
+          </div>
+
+          <h5 class="fw-bold text-white fs-6 mb-1">{{ review.title }}</h5>
+          <p class="text-secondary small mb-3 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+            {{ review.content }}
+          </p>
+
+          <div class="d-flex justify-content-between align-items-center pt-2 border-top border-subtle small">
+            <a href="{{ url_for('games.detail', slug=review.game.slug) }}" class="text-fuchsia fw-medium text-decoration-none">
+              <i class="bi bi-controller me-1"></i> {{ review.game.title }}
+            </a>
+            <span class="text-muted"><i class="bi bi-chat-left-dots me-1"></i> {{ review.comments|length }}</span>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+
+<!-- ==========================================================================
+     BROWSE BY GENRE
+     ========================================================================== -->
+<div class="mt-4 mb-4">
+  <div class="section-header-launcher">
+    <h2 class="section-title-launcher">Browse by Genre</h2>
+  </div>
+
+  <div class="d-flex flex-wrap gap-2">
+    {% for genre in genres %}
+      <a href="{{ url_for('games.catalogue', genre=genre.slug) }}" class="tag-pill-xs py-2 px-3 text-decoration-none text-white d-inline-flex align-items-center gap-2">
+        <i class="bi bi-tag-fill text-fuchsia"></i>
+        <span>{{ genre.name }}</span>
+        <span class="badge bg-dark rounded-pill" style="font-size: 0.65rem;">{{ genre.games|length }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Dynamic Hero Carousel switching
+  document.addEventListener('DOMContentLoaded', () => {
+    const heroSlides = [
+      {% for g in carousel_games %}
+        {
+          title: {{ g.title|tojson }},
+          desc: {{ g.description|tojson }},
+          banner: {{ url_for('static', filename='uploads/banners/' + g.banner_image)|tojson if g.banner_image else url_for('static', filename='uploads/banners/spiderman-banner.jpg')|tojson }},
+          url: {{ url_for('games.detail', slug=g.slug)|tojson }}
+        },
+      {% endfor %}
+    ];
+
+    let currentIndex = 0;
+    const titleEl = document.getElementById('heroTitle');
+    const descEl = document.getElementById('heroDesc');
+    const bgImgEl = document.getElementById('heroBgImg');
+    const ctaBtn = document.getElementById('heroCtaBtn');
+    const slideNumEl = document.getElementById('heroCurrentSlide');
+    const prevBtn = document.getElementById('heroPrevBtn');
+    const nextBtn = document.getElementById('heroNextBtn');
+
+    function updateSlide(idx) {
+      if (!heroSlides.length) return;
+      currentIndex = (idx + heroSlides.length) % heroSlides.length;
+      const slide = heroSlides[currentIndex];
+      if (titleEl) titleEl.textContent = slide.title;
+      if (descEl) descEl.textContent = slide.desc;
+      if (bgImgEl) bgImgEl.src = slide.banner;
+      if (ctaBtn) ctaBtn.href = slide.url;
+      if (slideNumEl) slideNumEl.textContent = currentIndex + 1;
+    }
+
+    if (prevBtn) {
+      prevBtn.addEventListener('click', () => updateSlide(currentIndex - 1));
+    }
+    if (nextBtn) {
+      nextBtn.addEventListener('click', () => updateSlide(currentIndex + 1));
+    }
+  });
+</script>
+{% endblock %}

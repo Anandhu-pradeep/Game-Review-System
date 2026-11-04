@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}404 – Level Not Found – GameShelf{% endblock %}
+
+{% block content %}
+<div class="container py-5 text-center my-auto">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="p-5 rounded-4 border border-subtle" style="background-color: var(--bg-card);">
+        <div class="display-1 fw-extrabold text-gradient-primary mb-2">404</div>
+        <h3 class="fw-bold text-white mb-2">Game Over: Page Not Found</h3>
+        <p class="text-secondary small mb-4">The level or coordinate you are looking for has been moved, deleted, or never existed in this dimension.</p>
+        <div class="d-flex justify-content-center gap-3">
+          <a href="{{ url_for('games.index') }}" class="btn btn-primary-gaming">
+            <i class="bi bi-house-door me-1"></i> Return Home
+          </a>
+          <a href="{{ url_for('games.catalogue') }}" class="btn btn-secondary-gaming">
+            <i class="bi bi-controller me-1"></i> Browse Games
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

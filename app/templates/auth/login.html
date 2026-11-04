@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Sign In – GameShelf{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-5 col-md-7">
+      <div class="p-4 p-md-5 rounded-4 border border-subtle shadow-lg" style="background-color: var(--bg-card);">
+        <div class="text-center mb-4">
+          <div class="brand-icon mx-auto mb-3" style="width: 48px; height: 48px;">
+            <i class="bi bi-controller text-white fs-4"></i>
+          </div>
+          <h2 class="fw-bold text-white mb-1">Welcome Back</h2>
+          <p class="text-secondary small">Sign in to your GameShelf community account</p>
+        </div>
+
+        <form action="{{ url_for('auth.login', next=request.args.get('next')) }}" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+          <div class="mb-3">
+            <label class="form-label text-secondary small fw-bold text-uppercase">Username or Email</label>
+            <div class="input-group">
+              <span class="input-group-text bg-secondary border-0 text-muted"><i class="bi bi-person"></i></span>
+              <input type="text" name="login_input" class="form-control form-control-gaming" placeholder="Enter username or email address" value="{{ login_input or '' }}" required autofocus>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-secondary small fw-bold text-uppercase">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-secondary border-0 text-muted"><i class="bi bi-lock"></i></span>
+              <input type="password" name="password" class="form-control form-control-gaming" placeholder="••••••••" required>
+            </div>
+          </div>
+
+          <div class="mb-4 form-check">
+            <input type="checkbox" class="form-check-input bg-secondary border-secondary" id="remember" name="remember" checked>
+            <label class="form-check-label text-secondary small" for="remember">Remember me for 7 days</label>
+          </div>
+
+          <button type="submit" class="btn btn-primary-gaming w-100 py-2 mb-3">
+            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In to Account
+          </button>
+        </form>
+
+        <div class="text-center mt-3 pt-3 border-top border-subtle">
+          <p class="text-secondary small mb-0">
+            Don't have an account? 
+            <a href="{{ url_for('auth.register') }}" class="text-info fw-semibold">Create one free</a>
+          </p>
+        </div>
+
+        <!-- Quick Demo Credentials Box -->
+        <div class="mt-4 p-3 rounded-3 border border-subtle small text-secondary" style="background-color: var(--bg-surface);">
+          <div class="fw-bold text-white mb-1"><i class="bi bi-info-circle text-info me-1"></i> Quick Test Credentials</div>
+          <div>Admin: <code>admin</code> / <code>Admin123!</code></div>
+          <div>User: <code>pixel_warrior</code> / <code>Gamer123!</code></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "users/dashboard_layout.html" %}
+
+{% block title %}Account Settings – Member Hub – GameShelf{% endblock %}
+
+{% block dashboard_content %}
+<div class="row g-4">
+  <!-- Profile & Avatar Settings -->
+  <div class="col-lg-7">
+    <div class="p-4 rounded-4 border border-subtle" style="background-color: var(--bg-card);">
+      <h4 class="fw-bold text-white mb-3"><i class="bi bi-person-gear text-info me-2"></i> Profile Settings</h4>
+      <form action="{{ url_for('users.settings') }}" method="POST" enctype="multipart/form-data">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="update_profile">
+
+        <!-- Avatar preview & Upload Dropzone -->
+        <div class="mb-4 d-flex align-items-center gap-4">
+          <img src="{{ url_for('static', filename='uploads/avatars/' + user.avatar) if user.avatar != 'default_avatar.png' else url_for('static', filename='uploads/avatars/default_avatar.png') }}"
+               class="avatar-lg" alt="{{ user.username }}" onerror="this.src='/static/uploads/avatars/default_avatar.png'">
+          <div class="flex-grow-1">
+            <label class="form-label text-secondary small fw-bold text-uppercase">Profile Avatar</label>
+            <input type="file" name="avatar" class="form-control form-control-gaming form-control-sm" accept="image/*">
+            <div class="text-muted small mt-1" style="font-size: 0.75rem;">JPG, PNG, WEBP. Max 5MB.</div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary small fw-bold text-uppercase">Username</label>
+          <input type="text" class="form-control form-control-gaming" value="{{ user.username }}" disabled>
+          <div class="text-muted small mt-1" style="font-size: 0.75rem;">Usernames cannot be changed once established.</div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary small fw-bold text-uppercase">Email Address</label>
+          <input type="email" name="email" class="form-control form-control-gaming" value="{{ user.email }}" required>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-secondary small fw-bold text-uppercase">Biography</label>
+          <textarea name="bio" class="form-control form-control-gaming" rows="4" placeholder="Share your favorite genres, gaming rigs, and top games of all time...">{{ user.bio or '' }}</textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary-gaming">
+          <i class="bi bi-check2 me-1"></i> Save Profile Details
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Security Settings -->
+  <div class="col-lg-5">
+    <div class="p-4 rounded-4 border border-subtle" style="background-color: var(--bg-card);">
+      <h4 class="fw-bold text-white mb-3"><i class="bi bi-shield-lock text-purple me-2" style="color: var(--accent-primary);"></i> Change Password</h4>
+      <form action="{{ url_for('users.settings') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="action" value="change_password">
+
+        <div class="mb-3">
+          <label class="form-label text-secondary small fw-bold text-uppercase">Current Password</label>
+          <input type="password" name="current_password" class="form-control form-control-gaming" placeholder="••••••••" required>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary small fw-bold text-uppercase">New Password</label>
+          <input type="password" name="new_password" class="form-control form-control-gaming" placeholder="Minimum 6 characters" required>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label text-secondary small fw-bold text-uppercase">Confirm New Password</label>
+          <input type="password" name="confirm_password" class="form-control form-control-gaming" placeholder="Repeat new password" required>
+        </div>
+
+        <button type="submit" class="btn btn-secondary-gaming w-100">
+          <i class="bi bi-key me-1"></i> Update Password
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

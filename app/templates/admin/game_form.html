@@ -1,0 +1,141 @@
+{% extends "admin/layout.html" %}
+
+{% block title %}{% if game %}Edit {{ game.title }}{% else %}Add New Game{% endif %} – Admin Console – GameShelf{% endblock %}
+
+{% block admin_content %}
+<div class="p-4 rounded-4 border border-subtle" style="background-color: var(--bg-card);">
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-subtle">
+    <div>
+      <h3 class="fw-bold text-white mb-1">
+        {% if game %}
+          <i class="bi bi-pencil-square text-info me-2"></i> Edit Game: {{ game.title }}
+        {% else %}
+          <i class="bi bi-plus-circle text-info me-2"></i> Add New Game
+        {% endif %}
+      </h3>
+      <p class="text-secondary small mb-0">Publish official titles, upload artwork, and configure platform availability.</p>
+    </div>
+    <a href="{{ url_for('admin.manage_games') }}" class="btn btn-secondary-gaming btn-sm">
+      <i class="bi bi-arrow-left me-1"></i> Back to Games
+    </a>
+  </div>
+
+  <form action="{% if game %}{{ url_for('admin.edit_game', game_id=game.id) }}{% else %}{{ url_for('admin.add_game') }}{% endif %}" method="POST" enctype="multipart/form-data">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="row g-4">
+      <!-- Left Column: Details -->
+      <div class="col-lg-8">
+        <div class="mb-3">
+          <label class="form-label text-secondary small fw-bold text-uppercase">Game Title <span class="text-danger">*</span></label>
+          <input type="text" name="title" class="form-control form-control-gaming" placeholder="e.g. Elden Ring" value="{{ game.title if game else '' }}" required autofocus>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label text-secondary small fw-bold text-uppercase">Description & Synopsis <span class="text-danger">*</span></label>
+          <textarea name="description" class="form-control form-control-gaming" rows="8" placeholder="Provide background story, setting, core gameplay mechanics..." required>{{ game.description if game else '' }}</textarea>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6">
+            <label class="form-label text-secondary small fw-bold text-uppercase">Developer</label>
+            <input type="text" name="developer" class="form-control form-control-gaming" placeholder="e.g. FromSoftware" value="{{ game.developer if game else '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-secondary small fw-bold text-uppercase">Publisher</label>
+            <input type="text" name="publisher" class="form-control form-control-gaming" placeholder="e.g. Bandai Namco" value="{{ game.publisher if game else '' }}">
+          </div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6">
+            <label class="form-label text-secondary small fw-bold text-uppercase">Release Date</label>
+            <input type="date" name="release_date" class="form-control form-control-gaming" value="{{ game.release_date.strftime('%Y-%m-%d') if game and game.release_date else '' }}">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label text-secondary small fw-bold text-uppercase">Game Mode</label>
+            <select name="game_mode" class="form-select form-select-gaming">
+              <option value="Single-player" {% if game and game.game_mode == 'Single-player' %}selected{% endif %}>Single-player</option>
+              <option value="Multiplayer" {% if game and game.game_mode == 'Multiplayer' %}selected{% endif %}>Multiplayer</option>
+              <option value="Both" {% if game and game.game_mode == 'Both' %}selected{% endif %}>Single-player & Multiplayer</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Genres Checkboxes -->
+        <div class="mb-4">
+          <label class="form-label text-secondary small fw-bold text-uppercase mb-2">Assign Genres</label>
+          <div class="d-flex flex-wrap gap-2 p-3 rounded-3 border border-subtle" style="background-color: var(--bg-surface);">
+            {% set active_genre_ids = game.genres|map(attribute='id')|list if game else [] %}
+            {% for g in genres %}
+              <div class="form-check form-check-inline me-3 mb-1">
+                <input class="form-check-input bg-secondary border-secondary" type="checkbox" name="genre_ids" id="genre_{{ g.id }}" value="{{ g.id }}" {% if g.id in active_genre_ids %}checked{% endif %}>
+                <label class="form-check-label text-white small" for="genre_{{ g.id }}">{{ g.name }}</label>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Platforms Checkboxes -->
+        <div class="mb-4">
+          <label class="form-label text-secondary small fw-bold text-uppercase mb-2">Supported Platforms</label>
+          <div class="d-flex flex-wrap gap-2 p-3 rounded-3 border border-subtle" style="background-color: var(--bg-surface);">
+            {% set active_platform_ids = game.platforms|map(attribute='id')|list if game else [] %}
+            {% for p in platforms %}
+              <div class="form-check form-check-inline me-3 mb-1">
+                <input class="form-check-input bg-secondary border-secondary" type="checkbox" name="platform_ids" id="platform_{{ p.id }}" value="{{ p.id }}" {% if p.id in active_platform_ids %}checked{% endif %}>
+                <label class="form-check-label text-white small" for="platform_{{ p.id }}">
+                  <i class="bi {{ p.icon_class }} me-1"></i> {{ p.name }}
+                </label>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Artwork Uploads -->
+      <div class="col-lg-4">
+        <!-- Cover Art Upload Dropzone -->
+        <div class="p-3 rounded-4 border border-subtle mb-4" style="background-color: var(--bg-surface);">
+          <label class="form-label text-white fw-bold mb-2 small text-uppercase">
+            Box Cover Artwork <span class="text-danger">{% if not game %}*{% endif %}</span>
+          </label>
+          
+          <div class="dropzone-upload-box mb-2">
+            <input type="file" name="cover_image" class="d-none" accept="image/*" {% if not game %}required{% endif %}>
+            <i class="bi bi-cloud-arrow-up fs-2 text-info d-block mb-1"></i>
+            <span class="small text-secondary d-block">Click or drag & drop cover art</span>
+            <span class="text-muted" style="font-size: 0.72rem;">Standard 3:4 aspect ratio (PNG, JPG, WEBP)</span>
+            <div class="dropzone-preview">
+              {% if game and game.cover_image %}
+                <img src="{{ url_for('static', filename='uploads/covers/' + game.cover_image) }}" alt="Current Cover" class="rounded shadow mt-2" style="max-height: 140px; aspect-ratio: 3/4; object-fit: cover;">
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <!-- Banner Art Upload Dropzone -->
+        <div class="p-3 rounded-4 border border-subtle mb-4" style="background-color: var(--bg-surface);">
+          <label class="form-label text-white fw-bold mb-2 small text-uppercase">Banner Artwork (Optional)</label>
+          
+          <div class="dropzone-upload-box mb-2">
+            <input type="file" name="banner_image" class="d-none" accept="image/*">
+            <i class="bi bi-image fs-2 text-purple d-block mb-1" style="color: var(--accent-primary);"></i>
+            <span class="small text-secondary d-block">Click or drag landscape banner</span>
+            <span class="text-muted" style="font-size: 0.72rem;">Wide wallpaper recommended 1920x1080</span>
+            <div class="dropzone-preview">
+              {% if game and game.banner_image %}
+                <img src="{{ url_for('static', filename='uploads/banners/' + game.banner_image) }}" alt="Current Banner" class="rounded shadow mt-2 w-100" style="max-height: 90px; object-fit: cover;">
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary-gaming w-100 py-3 fw-bold">
+          <i class="bi bi-check2-circle me-1"></i> {% if game %}Save Game Modifications{% else %}Publish Game to Catalogue{% endif %}
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

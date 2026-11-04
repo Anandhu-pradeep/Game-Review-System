@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Administration Portal – GameShelf{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 py-4">
+  <div class="row g-4">
+    <!-- Admin Sidebar -->
+    <div class="col-lg-2 col-md-3">
+      <div class="dashboard-sidebar-container">
+        <!-- Admin Identity Block -->
+        <div class="d-flex align-items-center gap-2 pb-3 mb-3 border-bottom border-subtle">
+          <div class="brand-icon" style="background: linear-gradient(135deg, var(--accent-danger), var(--accent-primary)); width: 34px; height: 34px;">
+            <i class="bi bi-shield-shaded text-white fs-6"></i>
+          </div>
+          <div>
+            <h6 class="fw-bold text-white mb-0 small">Admin Console</h6>
+            <span class="badge" style="background-color: var(--accent-danger); font-size: 0.62rem;">SYSTEM LEVEL</span>
+          </div>
+        </div>
+
+        <!-- Admin Navigation Links -->
+        <nav class="d-flex flex-column gap-1">
+          <a href="{{ url_for('admin.overview') }}" class="sidebar-link-item {% if request.endpoint == 'admin.overview' %}active{% endif %}">
+            <i class="bi bi-speedometer2 text-info"></i>
+            <span>Overview</span>
+          </a>
+          <a href="{{ url_for('admin.manage_games') }}" class="sidebar-link-item {% if request.endpoint == 'admin.manage_games' %}active{% endif %}">
+            <i class="bi bi-controller text-primary"></i>
+            <span>Catalogue Games</span>
+          </a>
+          <a href="{{ url_for('admin.add_game') }}" class="sidebar-link-item {% if request.endpoint == 'admin.add_game' %}active{% endif %}">
+            <i class="bi bi-plus-circle text-success"></i>
+            <span>Add New Game</span>
+          </a>
+          <a href="{{ url_for('admin.manage_genres') }}" class="sidebar-link-item {% if request.endpoint == 'admin.manage_genres' %}active{% endif %}">
+            <i class="bi bi-tags text-warning"></i>
+            <span>Genres</span>
+          </a>
+          <a href="{{ url_for('admin.manage_platforms') }}" class="sidebar-link-item {% if request.endpoint == 'admin.manage_platforms' %}active{% endif %}">
+            <i class="bi bi-display text-info"></i>
+            <span>Platforms</span>
+          </a>
+          <a href="{{ url_for('admin.manage_users') }}" class="sidebar-link-item {% if request.endpoint == 'admin.manage_users' %}active{% endif %}">
+            <i class="bi bi-people text-light"></i>
+            <span>Users & Roles</span>
+          </a>
+          <a href="{{ url_for('admin.manage_reviews') }}" class="sidebar-link-item {% if request.endpoint == 'admin.manage_reviews' %}active{% endif %}">
+            <i class="bi bi-chat-left-dots text-danger"></i>
+            <span>Review Moderation</span>
+          </a>
+          <a href="{{ url_for('admin.statistics') }}" class="sidebar-link-item {% if request.endpoint == 'admin.statistics' %}active{% endif %}">
+            <i class="bi bi-graph-up text-secondary"></i>
+            <span>Statistics</span>
+          </a>
+          
+          <hr class="border-subtle my-2">
+          
+          <a href="{{ url_for('games.index') }}" class="sidebar-link-item text-info">
+            <i class="bi bi-arrow-left-circle"></i>
+            <span>Public Website</span>
+          </a>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="col-lg-10 col-md-9">
+      {% block admin_content %}{% endblock %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends "users/dashboard_layout.html" %}
+
+{% block title %}My Ratings – Member Hub – GameShelf{% endblock %}
+
+{% block dashboard_content %}
+<div class="p-4 rounded-4 border border-subtle" style="background-color: var(--bg-card);">
+  <div class="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-subtle">
+    <div>
+      <h3 class="fw-bold text-white mb-1"><i class="bi bi-star-fill text-warning me-2"></i> My Star Ratings</h3>
+      <p class="text-secondary small mb-0">Video games you have scored from 1 to 5 stars.</p>
+    </div>
+    <span class="badge px-3 py-2 border border-subtle" style="background-color: var(--bg-surface);">{{ ratings|length }} Scored</span>
+  </div>
+
+  {% if ratings %}
+    <div class="row g-3">
+      {% for r in ratings %}
+        <div class="col-md-6">
+          <div class="p-3 rounded-3 border border-subtle d-flex align-items-center gap-3" style="background-color: var(--bg-surface);">
+            <img src="{{ url_for('static', filename='uploads/covers/' + r.game.cover_image) }}" class="rounded shadow-sm" width="60" height="80" style="object-fit: cover;" alt="{{ r.game.title }}">
+            <div class="flex-grow-1 overflow-hidden">
+              <h6 class="fw-bold mb-1 text-truncate">
+                <a href="{{ url_for('games.detail', slug=r.game.slug) }}" class="text-white">{{ r.game.title }}</a>
+              </h6>
+              <div class="mb-2">
+                {% for i in range(1, 6) %}
+                  <i class="bi bi-star-fill {% if i <= r.score %}text-warning{% else %}text-muted{% endif %}" style="font-size: 0.85rem;"></i>
+                {% endfor %}
+                <span class="ms-1 fw-bold text-white small">({{ r.score }}/5)</span>
+              </div>
+              <div class="text-muted small" style="font-size: 0.72rem;">Rated {{ r.created_at|format_date }}</div>
+            </div>
+            <div>
+              <a href="{{ url_for('games.detail', slug=r.game.slug) }}" class="btn btn-secondary-gaming btn-sm">
+                View
+              </a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="text-center py-5 text-secondary">
+      <i class="bi bi-star fs-1 mb-3 d-block text-warning"></i>
+      <h5 class="text-white">No games rated yet.</h5>
+      <p class="small">Open any game page in the catalogue and click the stars to rate it!</p>
+      <a href="{{ url_for('games.catalogue') }}" class="btn btn-primary-gaming btn-sm mt-2">Discover Games</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}
